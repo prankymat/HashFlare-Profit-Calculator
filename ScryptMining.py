@@ -3,13 +3,12 @@ import os, sys
 class Simulator:
 	def __init__(self):
 		self.btcPrice = float(input("BTC Price now (5000 USD): ") or "5000")
-		self.difficulty = int(input("Current Difficulty (1196792694099): ") or "1196792694099")
-		self.reward = float(input("Current Reward (12.5): ") or "12.5")
-		self.hashRate = float(input("Your hashrate now (1 TH/s): ") or "1")
+		self.litePrice = float(input("Litecoin Price now (5000 USD): ") or "5000")
+		self.hashRate = float(input("Your hashrate now (1 MH/s): ") or "1")
 		self.profitADay = float(0)
 		self.capital = float(input("Balance in BTC (0 BTC): ") or "0")
 		self.reinvest = (input("Reinvesting? (T/F): ") or "F").lower()
-		self.minReinvestRate = (0.01, self.USDToBTC(1.5))
+		self.minReinvestRate = (1, self.USDToBTC(7.5))
 		self.time = 0
 		self.totalInvestment = 0
 		self.updateProfitADay()
@@ -36,7 +35,7 @@ class Simulator:
 		self.hashRate += self.minReinvestRate[0] * quantity
 
 	def updateProfitADay(self):
-		self.profitADay = (self.hashRate*math.pow(10,12)*86400*self.reward)/(math.pow(2,32)*self.difficulty)
+		self.profitADay = (self.hashRate*0.00000606)
 
 	def payout(self):
 		self.capital += self.profitADay
