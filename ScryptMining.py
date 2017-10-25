@@ -2,18 +2,18 @@ import math
 import os, sys
 class Simulator:
 	def __init__(self):
-		self.btcPrice = float(input("BTC Price now (5000 USD): ") or "5000")
-		self.litePrice = float(input("Litecoin Price now (5000 USD): ") or "5000")
-		self.hashRate = float(input("Your hashrate now (1 MH/s): ") or "1")
+		self.btcPrice = float(input('BTC Price now (5000 USD): ') or '5000')
+		self.litePrice = float(input('Litecoin Price now (5000 USD): ') or '5000')
+		self.hashRate = float(input('Your hashrate now (1 MH/s): ') or '1')
 		self.profitADay = float(0)
-		self.capital = float(input("Balance in BTC (0 BTC): ") or "0")
-		self.reinvest = (input("Reinvesting? (T/F): ") or "F").lower()
+		self.capital = float(input('Balance in BTC (0 BTC): ') or '0')
+		self.reinvest = (input('Reinvesting? (T/F): ') or 'F').lower()
 		self.minReinvestRate = (1, self.USDToBTC(7.5))
 		self.time = 0
 		self.totalInvestment = 0
 		self.updateProfitADay()
 
-		if self.reinvest == "true" or self.reinvest == "t":
+		if self.reinvest == 'true' or self.reinvest == 't':
 			self.reinvest = True
 		else:
 			self.reinvest = False
@@ -52,20 +52,20 @@ class Simulator:
 				eachTick()
 
 	def printStats(self):
-		print("Day", str(self.time) + ":")
-		print("Total Investment:", '{0:.2f}'.format(self.totalInvestment))
-		print("Hash Rate:", '{0:.2f}'.format(self.hashRate))
-		print("Balance:", '{0:.15f}'.format(self.capital), "approx in USD:", '{0:.2f}'.format(self.BTCToUSD(self.capital)))
-		print("Profit a day:", '{0:.15f}'.format(self.profitADay), "approx in USD:", '{0:.2f}'.format(self.BTCToUSD(self.profitADay)))
+		print('Day', str(self.time) + ':')
+		print('Total Investment:', '{0:.2f}'.format(self.totalInvestment))
+		print('Hash Rate:', '{0:.2f}'.format(self.hashRate))
+		print('Balance:', '{0:.15f}'.format(self.capital), 'approx in USD:', '{0:.2f}'.format(self.BTCToUSD(self.capital)))
+		print('Profit a day:', '{0:.15f}'.format(self.profitADay), 'approx in USD:', '{0:.2f}'.format(self.BTCToUSD(self.profitADay)))
 		print('--------------------')
 
 
 def getAction(userInput):
-	arguments = userInput.split(" ")
+	arguments = userInput.split(' ')
 	if len(arguments) > 1:
 		return arguments[0], arguments[1:]
 	else:
-		print("Syntax Error!")
+		print('Syntax Error!')
 		return None, None
 
 
@@ -73,8 +73,8 @@ simulator = Simulator()
 print('--------------------')
 simulator.printStats()
 while True:
-	userInput = input(">>> ").lower()
-	if userInput == "restart" or userInput == "r":
+	userInput = input('>>> ').lower()
+	if userInput == 'restart' or userInput == 'r':
 		if os.name == 'nt':
 			os.system('cls')
 		else:
@@ -82,6 +82,6 @@ while True:
 		os.execl(sys.executable, sys.executable, *sys.argv)
 
 	(action,arguments) = getAction(userInput)
-	if action == "tick" or action == "t":
+	if action == 'tick' or action == 't':
 		simulator.tick(int(arguments[0]), simulator.printStats)
 

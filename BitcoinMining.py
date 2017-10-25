@@ -5,20 +5,20 @@ from collections import defaultdict
 
 class Simulator:
 	def __init__(self):
-		self.btcPrice = float(input("BTC Price now (5000 USD): ") or "5000")
-		self.difficulty = int(input("Current Difficulty (1196792694099): ") or "1196792694099")
-		self.reward = float(input("Current Reward (12.5): ") or "12.5")
+		self.btcPrice = float(input('BTC Price now (5000 USD): ') or '5000')
+		self.difficulty = int(input('Current Difficulty (1196792694099): ') or '1196792694099')
+		self.reward = float(input('Current Reward (12.5): ') or '12.5')
 		self.hashRate = defaultdict(int)
-		self.hashRate[0] = float(input("Your hashrate now (1 TH/s): ") or "1")
+		self.hashRate[0] = float(input('Your hashrate now (1 TH/s): ') or '1')
 		self.profitADay = float(0)
-		self.capital = float(input("Balance in BTC (0 BTC): ") or "0")
-		self.reinvest = (input("Reinvesting? (T/F): ") or "F").lower()
+		self.capital = float(input('Balance in BTC (0 BTC): ') or '0')
+		self.reinvest = (input('Reinvesting? (T/F): ') or 'F').lower()
 		self.minReinvestRate = (0.01, self.USDToBTC(1.5))
 		self.time = 0
 		self.totalInvestment = 0
 		self.updateProfitADay()
 
-		if self.reinvest == "true" or self.reinvest == "t":
+		if self.reinvest == 'true' or self.reinvest == 't':
 			self.reinvest = True
 		else:
 			self.reinvest = False
@@ -53,7 +53,7 @@ class Simulator:
 		if self.time-365 >= 0:
 			for i in range(0, self.time-365):
 				if self.hashRate[i] != 0:
-					print("Expiring", '{0:.2f}'.format(self.hashRate[i])+"TH/s", "which was bought at day", i)
+					print('Expiring', '{0:.2f}'.format(self.hashRate[i])+'TH/s', 'which was bought at day', i)
 					self.hashRate[i] = 0
 
 	def tick(self, interval = 1, eachTick = None):
@@ -69,39 +69,39 @@ class Simulator:
 			self.time += 1
 
 	def printStats(self):
-		print("Day", str(self.time) + ":")
-		print("Total Investment:", '{0:.2f}'.format(self.totalInvestment))
-		print("Hash Rate:", '{0:.2f}'.format(self.hashRateCurrently()))
-		print("Balance:", '{0:.15f}'.format(self.capital), "approx in USD:", '{0:.2f}'.format(self.BTCToUSD(self.capital)))
-		print("Profit a day:", '{0:.15f}'.format(self.profitADay), "approx in USD:", '{0:.2f}'.format(self.BTCToUSD(self.profitADay)))
+		print('Day', str(self.time) + ':')
+		print('Total Investment:', '{0:.2f}'.format(self.totalInvestment))
+		print('Hash Rate:', '{0:.2f}'.format(self.hashRateCurrently()))
+		print('Balance:', '{0:.15f}'.format(self.capital), 'approx in USD:', '{0:.2f}'.format(self.BTCToUSD(self.capital)))
+		print('Profit a day:', '{0:.15f}'.format(self.profitADay), 'approx in USD:', '{0:.2f}'.format(self.BTCToUSD(self.profitADay)))
 		print('--------------------')
 
 	def printBalance(self):
-		print(self.time,'{0:.15f}'.format(self.capital),"", sep=',')
+		print(self.time,'{0:.15f}'.format(self.capital),'', sep=',')
 
 	def printPayoutPerDay(self):
-		# print(self.time,'{0:.2f}'.format(self.BTCToUSD(self.profitADay)),"", sep=",")
-		print(self.time,'{0:.15f}'.format(self.profitADay),"", sep=',')
+		# print(self.time,'{0:.2f}'.format(self.BTCToUSD(self.profitADay)),'', sep=',')
+		print(self.time,'{0:.15f}'.format(self.profitADay),'', sep=',')
 
 
 def getAction(userInput):
-	arguments = userInput.split(" ")
+	arguments = userInput.split(' ')
 	if len(arguments) > 1:
 		return arguments[0], arguments[1:]
 	else:
-		print("Syntax Error!")
+		print('Syntax Error!')
 		return None, None
 
 
 simulator = Simulator()
 print('--------------------')
 while True:
-	userInput = input(">>> ").lower()
-	if userInput == "":
+	userInput = input('>>> ').lower()
+	if userInput == '':
 		simulator.tick(1, simulator.printStats)
 		continue
 
-	if userInput == "restart" or userInput == "r":
+	if userInput == 'restart' or userInput == 'r':
 		if os.name == 'nt':
 			os.system('cls')
 		else:
@@ -109,6 +109,6 @@ while True:
 		os.execl(sys.executable, sys.executable, *sys.argv)
 
 	(action,arguments) = getAction(userInput)
-	if action == "tick" or action == "t":
+	if action == 'tick' or action == 't':
 		simulator.tick(int(arguments[0]), simulator.printStats)
 
