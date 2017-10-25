@@ -12,13 +12,13 @@ class Simulator:
 		self.hashRate[0] = float(input('Your hashrate now (1 TH/s): ') or '1')
 		self.profitADay = float(0)
 		self.capital = float(input('Balance in BTC (0 BTC): ') or '0')
-		self.reinvest = (input('Reinvesting? (T/F): ') or 'F').lower()
+		self.reinvest = (input('Reinvesting? (on/off): ') or 'off').lower()
 		self.minReinvestRate = (0.01, self.USDToBTC(1.5))
 		self.time = 0
 		self.totalInvestment = 0
 		self.updateProfitADay()
 
-		if self.reinvest == 'true' or self.reinvest == 't':
+		if self.reinvest in ['on', 'true', 't']:
 			self.reinvest = True
 		else:
 			self.reinvest = False
@@ -63,13 +63,14 @@ class Simulator:
 			if self.reinvest:
 				if self.canReinvest:
 					self.buyRate(self.capital/self.minReinvestRate[1])
-					self.updateProfitADay()
+			self.updateProfitADay()
 			if eachTick is not None:
 				eachTick()
 			self.time += 1
 
 	def printStats(self):
 		print('Day', str(self.time) + ':')
+		print('Reinvesting is', 'on' if self.reinvest else 'off')
 		print('Total Investment:', '{0:.2f}'.format(self.totalInvestment))
 		print('Hash Rate:', '{0:.2f}'.format(self.hashRateCurrently()))
 		print('Balance:', '{0:.15f}'.format(self.capital), 'approx in USD:', '{0:.2f}'.format(self.BTCToUSD(self.capital)))
@@ -86,9 +87,14 @@ class Simulator:
 
 def getAction(userInput):
 	arguments = userInput.split(' ')
-	if len(arguments) > 1:
-		return arguments[0], arguments[1:]
-	else:
+	try:
+		if arguments[0] == '':
+			return 'tick', [1]
+		elif arguments[0] == 'tick' or arguments[0] == 't':
+			return 'tick', arguments[1:]
+		elif arguments[0] == 'change' or arguments[0] == 'c':
+			return 'change', arguments[1:]
+	except IndexError:
 		print('Syntax Error!')
 		return None, None
 
@@ -97,18 +103,34 @@ simulator = Simulator()
 print('--------------------')
 while True:
 	userInput = input('>>> ').lower()
-	if userInput == '':
-		simulator.tick(1, simulator.printStats)
-		continue
-
-	if userInput == 'restart' or userInput == 'r':
-		if os.name == 'nt':
-			os.system('cls')
-		else:
-			os.system('clear')
-		os.execl(sys.executable, sys.executable, *sys.argv)
-
 	(action,arguments) = getAction(userInput)
-	if action == 'tick' or action == 't':
-		simulator.tick(int(arguments[0]), simulator.printStats)
+
+	if action == 'tick':
+		interval = 1
+		if len(arguments) == 1:
+			interval = int(arguments[0])
+		simulator.tick(interval, simulator.printStats)
+
+	elif action == 'change':
+		try:
+			arg = arguments[0]
+			if arg == 'all':
+				print("Resetting the simulation...")
+				simulator = Simulator()  # reinit the Simulator
+				print("Simulation has been reset!")
+			elif arg == 'capital':
+				simulator.capital = float(arguments[1])
+			elif arg == 'reinvest':
+				shouldReinvest = True if arguments[1] in ['on', 'true', 't'] else False
+				if shouldReinvest:
+					print("Reinvesting is now on")
+				else:
+					print("Reinvesting is now off")
+				simulator.reinvest = shouldReinvest
+		except IndexError:
+			print('\nPossible arguments after "change" are:\n'
+				  '\tall\n'
+				  '\tcapital [amount]\n'
+				  '\treinvest [on/off]\n'
+				 )
 
