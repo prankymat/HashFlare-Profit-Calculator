@@ -14,6 +14,7 @@ class Simulator:
 		self.capital = float(input('Balance in BTC (0 BTC): ') or '0')
 		self.reinvest = (input('Reinvesting? (on/off): ') or 'off').lower()
 		self.minReinvestRate = (0.01, self.USDToBTC(1.5))
+		self.maintenance = self.USDToBTC(0.35)
 		self.time = 0
 		self.totalInvestment = 0
 		self.updateProfitADay()
@@ -46,6 +47,9 @@ class Simulator:
 	def updateProfitADay(self):
 		self.profitADay = (self.hashRateCurrently()*math.pow(10,12)*86400*self.reward)/(math.pow(2,32)*self.difficulty)
 
+	def chargeMaintenance(self):
+		self.capital -= self.maintenance * self.hashRateCurrently()
+
 	def payout(self):
 		self.capital += self.profitADay
 
@@ -60,6 +64,7 @@ class Simulator:
 		for i in range(0, interval):
 			self.pruneExpiredContracts()
 			self.payout()
+			self.chargeMaintenance()
 			if self.reinvest:
 				if self.canReinvest:
 					self.buyRate(self.capital/self.minReinvestRate[1])
@@ -73,15 +78,15 @@ class Simulator:
 		print('Reinvesting is', 'on' if self.reinvest else 'off')
 		print('Total Investment:', '{0:.2f}'.format(self.totalInvestment))
 		print('Hash Rate:', '{0:.2f}'.format(self.hashRateCurrently()))
+		print('Payout a day:', '{0:.15f}'.format(self.profitADay), 'approx in USD:', '{0:.2f}'.format(self.BTCToUSD(self.profitADay)))
+		print('Maintenance fee:', '{0:.15f}'.format(self.maintenance * self.hashRateCurrently()))
 		print('Balance:', '{0:.15f}'.format(self.capital), 'approx in USD:', '{0:.2f}'.format(self.BTCToUSD(self.capital)))
-		print('Profit a day:', '{0:.15f}'.format(self.profitADay), 'approx in USD:', '{0:.2f}'.format(self.BTCToUSD(self.profitADay)))
 		print('--------------------')
 
 	def printBalance(self):
 		print(self.time,'{0:.15f}'.format(self.capital),'', sep=',')
 
 	def printPayoutPerDay(self):
-		# print(self.time,'{0:.2f}'.format(self.BTCToUSD(self.profitADay)),'', sep=',')
 		print(self.time,'{0:.15f}'.format(self.profitADay),'', sep=',')
 
 
