@@ -57,7 +57,7 @@ class Simulator:
 		if self.time-365 >= 0:
 			for i in range(0, self.time-365):
 				if self.hashRate[i] != 0:
-					print('Expiring', '{0:.2f}'.format(self.hashRate[i])+'TH/s', 'which was bought at day', i)
+					print('Expiring', '{0:.2f}'.format(self.hashRate[i])+'TH/s', 'which was bought on day', i)
 					self.hashRate[i] = 0
 
 	def tick(self, interval = 1, eachTick = None):
@@ -81,7 +81,7 @@ class Simulator:
 
 	def printStats(self):
 		print('Day', str(self.time) + ':')
-		print('Reinvesting is', 'on' if self.reinvest else 'off')
+		print('Reinvestment is', 'on' if self.reinvest else 'off')
 		print('Total Investment:', self.USDString(self.totalInvestment))
 		print('Hash Rate:', self.USDString(self.hashRateCurrently()))
 		print('Payout a day:', self.BTCString(self.profitADay), 'approx in USD:', self.USDString(self.BTCToUSD(self.profitADay)))
