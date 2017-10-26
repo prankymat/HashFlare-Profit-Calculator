@@ -73,21 +73,27 @@ class Simulator:
 				eachTick()
 			self.time += 1
 
+	def BTCString(self, number):
+		return '{0:.15f}'.format(number)
+
+	def USDString(self, number):
+		return '{0:.2f}'.format(number)
+
 	def printStats(self):
 		print('Day', str(self.time) + ':')
 		print('Reinvesting is', 'on' if self.reinvest else 'off')
-		print('Total Investment:', '{0:.2f}'.format(self.totalInvestment))
-		print('Hash Rate:', '{0:.2f}'.format(self.hashRateCurrently()))
-		print('Payout a day:', '{0:.15f}'.format(self.profitADay), 'approx in USD:', '{0:.2f}'.format(self.BTCToUSD(self.profitADay)))
-		print('Maintenance fee:', '{0:.15f}'.format(self.maintenance * self.hashRateCurrently()))
-		print('Balance:', '{0:.15f}'.format(self.capital), 'approx in USD:', '{0:.2f}'.format(self.BTCToUSD(self.capital)))
+		print('Total Investment:', self.USDString(self.totalInvestment))
+		print('Hash Rate:', self.USDString(self.hashRateCurrently()))
+		print('Payout a day:', self.BTCString(self.profitADay), 'approx in USD:', self.USDString(self.BTCToUSD(self.profitADay)))
+		print('Maintenance fee:', self.BTCString(self.maintenance * self.hashRateCurrently()))
+		print('Balance:', self.BTCString(self.capital), 'approx in USD:', self.USDString(self.BTCToUSD(self.capital)))
 		print('--------------------')
 
 	def printBalance(self):
-		print(self.time,'{0:.15f}'.format(self.capital),'', sep=',')
+		print(self.time,self.BTCString(self.capital),'', sep=',')
 
 	def printPayoutPerDay(self):
-		print(self.time,'{0:.15f}'.format(self.profitADay),'', sep=',')
+		print(self.time,self.BTCString(self.profitADay),'', sep=',')
 
 
 def getAction(userInput):
@@ -95,9 +101,9 @@ def getAction(userInput):
 	try:
 		if arguments[0] == '':
 			return 'tick', [1]
-		elif arguments[0] == 'tick' or arguments[0] == 't':
+		elif arguments[0] in ['tick', 't']:
 			return 'tick', arguments[1:]
-		elif arguments[0] == 'change' or arguments[0] == 'c':
+		elif arguments[0] in ['change', 'c']:
 			return 'change', arguments[1:]
 	except IndexError:
 		print('Syntax Error!')
@@ -121,7 +127,7 @@ while True:
 			arg = arguments[0]
 			if arg == 'all':
 				print("Resetting the simulation...")
-				simulator = Simulator()  # reinit the Simulator
+				simulator = Simulator()
 				print("Simulation has been reset!")
 			elif arg == 'capital':
 				simulator.capital = float(arguments[1])
