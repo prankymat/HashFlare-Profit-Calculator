@@ -1,28 +1,22 @@
 import math
-import os, sys
 from functools import reduce
 from collections import defaultdict
 
-class Simulator:
-	def __init__(self):
-		self.btcPrice = float(input('BTC Price now (5000 USD): ') or '5000')
-		self.difficulty = int(input('Current Difficulty (1196792694099): ') or '1196792694099')
-		self.reward = float(input('Current Reward (12.5): ') or '12.5')
-		self.hashRate = defaultdict(int)
-		self.hashRate[0] = float(input('Your hashrate now (1 TH/s): ') or '1')
+class Simulator(object):
+	def __init__(self, btcPrice, difficulty, reward, dayZeroHashRate, capital, reinvest):
+		self.btcPrice = btcPrice
+		self.difficulty = difficulty
+		self.reward = reward
+		self.hashRate = defaultdict(float)
+		self.hashRate[0] = dayZeroHashRate
+		self.capital = capital
+		self.reinvest = reinvest
 		self.profitADay = float(0)
-		self.capital = float(input('Balance in BTC (0 BTC): ') or '0')
-		self.reinvest = (input('Reinvesting? (on/off): ') or 'off').lower()
 		self.minReinvestRate = (0.01, self.USDToBTC(1.5))
 		self.maintenance = self.USDToBTC(0.35)
 		self.time = 0
 		self.totalInvestment = 0
 		self.updateProfitADay()
-
-		if self.reinvest in ['on', 'true', 't']:
-			self.reinvest = True
-		else:
-			self.reinvest = False
 
 	def USDToBTC(self, usd):
 		return usd / self.btcPrice
@@ -79,6 +73,71 @@ class Simulator:
 	def USDString(self, number):
 		return '{0:.2f}'.format(number)
 
+class REPLSimulator(Simulator):
+	def __init__(self):
+		btcPrice = float(input('BTC Price now (5000 USD): ') or '5000')
+		difficulty = int(input('Current Difficulty (1196792694099): ') or '1196792694099')
+		reward = float(input('Current Reward (12.5): ') or '12.5')
+		dayZeroHashRate = float(input('Your hashrate now (1 TH/s): ') or '1')
+		profitADay = float(0)
+		capital = float(input('Balance in BTC (0 BTC): ') or '0')
+		reinvest = (input('Reinvesting? (on/off): ') or 'off').lower()
+
+		if reinvest in ['on', 'true', 't']:
+			reinvest = True
+		else:
+			reinvest = False
+
+		super(REPLSimulator, self).__init__(btcPrice, difficulty, reward, dayZeroHashRate, capital, reinvest)
+
+	def getAction(self, userInput):
+		arguments = userInput.split(' ')
+		try:
+			if arguments[0] == '':
+				return 'tick', [1]
+			elif arguments[0] in ['tick', 't']:
+				return 'tick', arguments[1:]
+			elif arguments[0] in ['change', 'c']:
+				return 'change', arguments[1:]
+		except IndexError:
+			print('Syntax Error!')
+			return None, None
+
+	def run(self):
+		print('--------------------')
+		while True:
+			userInput = input('>>> ').lower()
+			(action,arguments) = self.getAction(userInput)
+
+			if action == 'tick':
+				interval = 1
+				if len(arguments) == 1:
+					interval = int(arguments[0])
+				self.tick(interval, self.printStats)
+
+			elif action == 'change':
+				try:
+					arg = arguments[0]
+					if arg == 'all':
+						print("Resetting the simulation...")
+						self = REPLSimulator()
+						print("Simulation has been reset!")
+					elif arg == 'capital':
+						self.capital = float(arguments[1])
+					elif arg == 'reinvest':
+						shouldReinvest = True if arguments[1] in ['on', 'true', 't'] else False
+						if shouldReinvest:
+							print("Reinvesting is now on")
+						else:
+							print("Reinvesting is now off")
+						self.reinvest = shouldReinvest
+				except IndexError:
+					print('\nPossible arguments after "change" are:\n'
+						  '\tall\n'
+						  '\tcapital [amount]\n'
+						  '\treinvest [on/off]\n'
+						 )
+
 	def printStats(self):
 		print('Day', str(self.time) + ':')
 		print('Reinvestment is', 'on' if self.reinvest else 'off')
@@ -89,6 +148,7 @@ class Simulator:
 		print('Balance:', self.BTCString(self.capital), 'approx in USD:', self.USDString(self.BTCToUSD(self.capital)))
 		print('--------------------')
 
+class CSVSimulator(Simulator):
 	def printBalance(self):
 		print(self.time,self.BTCString(self.capital),'', sep=',')
 
@@ -96,52 +156,7 @@ class Simulator:
 		print(self.time,self.BTCString(self.profitADay),'', sep=',')
 
 
-def getAction(userInput):
-	arguments = userInput.split(' ')
-	try:
-		if arguments[0] == '':
-			return 'tick', [1]
-		elif arguments[0] in ['tick', 't']:
-			return 'tick', arguments[1:]
-		elif arguments[0] in ['change', 'c']:
-			return 'change', arguments[1:]
-	except IndexError:
-		print('Syntax Error!')
-		return None, None
-
-
-simulator = Simulator()
-print('--------------------')
-while True:
-	userInput = input('>>> ').lower()
-	(action,arguments) = getAction(userInput)
-
-	if action == 'tick':
-		interval = 1
-		if len(arguments) == 1:
-			interval = int(arguments[0])
-		simulator.tick(interval, simulator.printStats)
-
-	elif action == 'change':
-		try:
-			arg = arguments[0]
-			if arg == 'all':
-				print("Resetting the simulation...")
-				simulator = Simulator()
-				print("Simulation has been reset!")
-			elif arg == 'capital':
-				simulator.capital = float(arguments[1])
-			elif arg == 'reinvest':
-				shouldReinvest = True if arguments[1] in ['on', 'true', 't'] else False
-				if shouldReinvest:
-					print("Reinvesting is now on")
-				else:
-					print("Reinvesting is now off")
-				simulator.reinvest = shouldReinvest
-		except IndexError:
-			print('\nPossible arguments after "change" are:\n'
-				  '\tall\n'
-				  '\tcapital [amount]\n'
-				  '\treinvest [on/off]\n'
-				 )
+if __name__ == '__main__':
+	simulator = REPLSimulator()
+	simulator.run()
 
